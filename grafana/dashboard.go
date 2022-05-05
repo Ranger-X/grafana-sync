@@ -18,12 +18,6 @@ func PullDashboard(grafanaURL string, apiKey string, directory string, tag strin
 		rawBoard   sdk.Board
 		meta       sdk.BoardProperties
 		err        error
-		raw    []byte
-		result struct {
-			Meta  BoardProperties `json:"meta"`
-			Board json.RawMessage `json:"dashboard"`
-		}
-		code int
 	)
 
 	ctx := context.Background()
