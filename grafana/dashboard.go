@@ -18,6 +18,12 @@ func PullDashboard(grafanaURL string, apiKey string, directory string, tag strin
 		rawBoard   sdk.Board
 		meta       sdk.BoardProperties
 		err        error
+		raw    []byte
+		result struct {
+			Meta  BoardProperties `json:"meta"`
+			Board json.RawMessage `json:"dashboard"`
+		}
+		code int
 	)
 
 	ctx := context.Background()
@@ -41,14 +47,18 @@ func PullDashboard(grafanaURL string, apiKey string, directory string, tag strin
 	}
 
 	for _, link := range boardLinks {
+		log.Printf("Downloading dashboard %s (%s)", link.Title, link.UID)
 		if rawBoard, meta, err = c.GetDashboardByUID(ctx, link.UID); err != nil {
-			log.Printf("%s for %s\n", err, link.URI)
+			log.Printf("%s for %s '%s' %s\n", err, link.URI, link.Title, link.UID)
+			log.Printf("rawBoard: %+v\n", rawBoard)
+			log.Printf("meta: %+v\n", meta)
 			ExecutionErrorHappened = true
 			continue
 		}
 		rawBoard.ID = 0
 		b, err := json.Marshal(rawBoard)
 		if err != nil {
+			log.Printf("%s for %s\n", err, link.URI)
 			return err
 		}
 		if err = writeToFile(directory, b, meta.Slug, tag); err != nil {
